@@ -1,37 +1,27 @@
 import 'dart:convert';
-import 'dart:math';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-//import 'package:pointycastle/random/fortuna_random.dart';
-import '../Models/EncryptionData.dart';
 import 'package:encrypt/encrypt.dart';
-//import 'package:pointycastle/pointycastle.dart';
-import "package:pointycastle/export.dart";
+import 'package:flutter/cupertino.dart';
+import 'package:pink_ladies_poker_client/Models/PokerTable.dart';
+import '../Helpers/EncryptionHelper.dart';
+import 'package:encrypt/encrypt.dart' as crypto;
 import 'package:http/http.dart' as http;
-import 'package:rsa_encrypt/rsa_encrypt.dart';
-import "package:asn1lib/asn1lib.dart";
+
+import '../Models/User.dart';
 
 class ApiProvider with ChangeNotifier {
-  var privateKey;
+  late crypto.Key AESKey;
+  late crypto.IV AESVector;
+  late User MyUser;
 
   Future GetAES() async {
-//initialize
-
     //generate encryption keys
-
-    var keyPair = generateRSAkeyPair(exampleSecureRandom());
+    var keyPair = EncryptionHelper.generateRSAkeyPair(
+        EncryptionHelper.exampleSecureRandom());
     final publicKey = keyPair.publicKey;
     final myprivateKey = keyPair.privateKey;
-    final publicKeyPem = encodePublicKeyToPem(publicKey);
+    final publicKeyPem = EncryptionHelper.encodePublicKeyToPem(publicKey);
 
-    // final encrypter =
-    //     Encrypter(RSA(publicKey: publicKey, privateKey: privateKey));
-    // //print("before decryption: " + decodedBefore);
-    // var data = encrypter.encrypt("hello world");
-
-    // var decryptedData = encrypter.decrypt(data);
-    // print(publicKeyPem);
-
+    //Send public key to Server & return encrypted AES keys
     final response = await http.post(
       Uri.parse('http://192.168.0.20:3000/api/GetAES'),
       headers: <String, String>{
@@ -42,29 +32,30 @@ class ApiProvider with ChangeNotifier {
       }),
     );
 
-    //print("private key: " + priKey.toString());
-
+    //Decrypt AES keys & assign to global variables
     if (response.statusCode == 200) {
-      // print('response: ' + response.body);
-
       try {
         var jsonobj = jsonDecode(response.body);
-        EcryptionData fromjson = EcryptionData.fromJson(jsonobj);
+        //EcryptionData fromjson = EcryptionData.fromJson(jsonobj);
 
-       // print(fromjson.data);
-        // Map<String, dynamic> JsonData = jsonobj;
-        // var bytesData = JsonData['data'];
-        // print("before decryption: ${fromjson.data}");
+        //Create encryption object from base64 string
+        final encrypter = crypto.Encrypter(
+            crypto.RSA(publicKey: publicKey, privateKey: myprivateKey));
+        var encryptedData = crypto.Encrypted.fromBase64(jsonobj['data']);
 
-        final encrypter =
-            Encrypter(RSA(publicKey: publicKey, privateKey: myprivateKey));
+        //decrypt data
+        var json = jsonDecode(encrypter.decrypt(encryptedData));
 
-        // var encrypted = encrypter.encrypt(fromjson.data);
+        //convert from base64 string to dataTypes Key & IV
+        AESKey = crypto.Key.fromBase64(json['key']);
+        AESVector = crypto.IV.fromBase64(json['iv']);
+        print("key: ${AESKey.base64} iv: ${AESVector.base64}");
 
-        var encryptedData = Encrypted.fromBase64(fromjson.data);
-        // print("before decryption: " + encryptedData.base64);
-        var keys = encrypter.decrypt(encryptedData);
-        print(keys);
+        //test symmetric encryption & decryption
+
+        //final decrypted = encrypter.decrypt(encrypted, iv: AESVector);
+
+        // print(decrypted);
       } catch (e) {
         print(e);
       }
@@ -73,61 +64,90 @@ class ApiProvider with ChangeNotifier {
     }
   }
 
-  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAkeyPair(
-      FortunaRandom secureRandom,
-      {int bitLength = 2048}) {
-    // Create an RSA key generator and initialize it
+  //create new user
+  Future<bool> StartGame(String userName) async {
+    var jsonbody = jsonEncode(<String, String>{'userName': userName});
 
-    final keyGen = RSAKeyGenerator()
-      ..init(ParametersWithRandom(
-          RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64),
-          secureRandom));
+    //encrypt data
+    final _encrypter = crypto.Encrypter(crypto.AES(AESKey, mode: AESMode.cbc));
+    final encrypted = _encrypter.encrypt(jsonbody, iv: AESVector);
 
-    // Use the generator
+    //send post request
+    final response = await http.post(
+      Uri.parse('http://192.168.0.20:3000/api/CreateUser'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'data': encrypted.base64,
+      }),
+    );
 
-    final pair = keyGen.generateKeyPair();
-
-    // Cast the generated key pair into the RSA key types
-
-    final myPublic = pair.publicKey as RSAPublicKey;
-    final myPrivate = pair.privateKey as RSAPrivateKey;
-
-    return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(myPublic, myPrivate);
-  }
-
-  encodePublicKeyToPem(RSAPublicKey publicKey) {
-    var algorithmSeq = new ASN1Sequence();
-    var algorithmAsn1Obj = new ASN1Object.fromBytes(Uint8List.fromList(
-        [0x6, 0x9, 0x2a, 0x86, 0x48, 0x86, 0xf7, 0xd, 0x1, 0x1, 0x1]));
-    var paramsAsn1Obj =
-        new ASN1Object.fromBytes(Uint8List.fromList([0x5, 0x0]));
-    algorithmSeq.add(algorithmAsn1Obj);
-    algorithmSeq.add(paramsAsn1Obj);
-
-    var publicKeySeq = new ASN1Sequence();
-    publicKeySeq.add(ASN1Integer(publicKey.modulus!));
-    publicKeySeq.add(ASN1Integer(publicKey.exponent!));
-    var publicKeySeqBitString =
-        new ASN1BitString(Uint8List.fromList(publicKeySeq.encodedBytes));
-
-    var topLevelSeq = new ASN1Sequence();
-    topLevelSeq.add(algorithmSeq);
-    topLevelSeq.add(publicKeySeqBitString);
-    var dataBase64 = base64.encode(topLevelSeq.encodedBytes);
-
-    return """-----BEGIN PUBLIC KEY-----\r\n$dataBase64\r\n-----END PUBLIC KEY-----""";
-  }
-
-  FortunaRandom exampleSecureRandom() {
-    final secureRandom = FortunaRandom();
-
-    final seedSource = Random.secure();
-    final seeds = <int>[];
-    for (int i = 0; i < 32; i++) {
-      seeds.add(seedSource.nextInt(255));
+    if (response.statusCode == 200) {
+      return true;
     }
-    secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
+    return false;
+  }
 
-    return secureRandom;
+  //leave game
+  Future<bool> LeaveGame(User user) async {
+    var jsonbody = jsonEncode(<String, String>{
+      'userID': user.UserID.toString(),
+      'tableID': user.TableID.toString()
+    });
+
+    //decrypt data
+    final _encrypter = crypto.Encrypter(crypto.AES(AESKey, mode: AESMode.cbc));
+    final encrypted = _encrypter.encrypt(jsonbody, iv: AESVector);
+
+    //send post request
+    final response = await http.post(
+      Uri.parse('http://192.168.0.20:3000/api/CreateUser'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'data': encrypted.base64,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return true;
+    }
+    return false;
+  }
+
+  //Convert byteData to json
+  Future ConvertBytesToJson(dynamic encryptedData) async {
+    final _encrypter = crypto.Encrypter(crypto.AES(AESKey, mode: AESMode.cbc));
+    final EncryptedType = crypto.Encrypted.fromBase64(encryptedData);
+    final decrypted = _encrypter.decrypt(EncryptedType, iv: AESVector);
+
+    final Map<String, dynamic> data = json.decode(decrypted);
+    // print(data);
+
+    var userList = data['users'] as List;
+    var collectiveCards = data['collectiveCards'] as List;
+    var cardDeck = data['cardDeck'] as List;
+
+    // print(data);
+    PokerTable table = PokerTable.ConvertFromJson(data);
+    print(table.collectiveCards[0]);
+    // List<User> users = [];
+    // for (var i = 0; i < userList.length; i++) {
+    //   var jsonCards = jsonDecode(userList[i]['pocketCards']);
+    //   List<String>? pocketCards = jsonCards != null ? List.from(jsonCards) : null;
+    //   User user = User.ConvertFromJson(userList[i]);
+
+    //   users.add(user);
+    // }
+    // print(table);
+    // print(userList);
+    // print(collectiveCards);
+    // print(cardDeck);
+
+    // List<User> userObjects =
+    //     userList.map((user) => User.ConvertFromJson(user)).toList();
+    // print(userObjects);
   }
 }

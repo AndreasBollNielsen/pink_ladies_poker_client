@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+//deprecated
 class EcryptionData {
   final dynamic data;
 
