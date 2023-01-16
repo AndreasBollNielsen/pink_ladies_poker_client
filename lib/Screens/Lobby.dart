@@ -3,6 +3,7 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import '../Providers/ApiProvider.dart';
 import 'package:provider/provider.dart';
+import '../Helpers/Config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class Lobby extends StatefulWidget {
@@ -14,7 +15,7 @@ class Lobby extends StatefulWidget {
 
 class _LobbyState extends State<Lobby> {
   final _channel = WebSocketChannel.connect(
-    Uri.parse('ws://192.168.42.49:80'),
+    Uri.parse('ws://${Config.IP}:${Config.Port}'),
   );
 
   @override
