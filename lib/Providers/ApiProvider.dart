@@ -12,8 +12,17 @@ class ApiProvider with ChangeNotifier {
   late crypto.Key AESKey;
   late crypto.IV AESVector;
   late User MyUser;
+  late bool GotKeys = false;
 
-  Future GetAES() async {
+  void PlayGame(String userName) async {
+    if (!GotKeys) {
+      await GetAES().whenComplete(() => CreateUser(userName));
+    } else {
+      await CreateUser(userName);
+    }
+  }
+
+  Future<void> GetAES() async {
     //generate encryption keys
     var keyPair = EncryptionHelper.generateRSAkeyPair(
         EncryptionHelper.exampleSecureRandom());
@@ -23,7 +32,7 @@ class ApiProvider with ChangeNotifier {
 
     //Send public key to Server & return encrypted AES keys
     final response = await http.post(
-      Uri.parse('http://192.168.0.20:3000/api/GetAES'),
+      Uri.parse('http://192.168.42.49:3000/api/GetAES'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -54,8 +63,8 @@ class ApiProvider with ChangeNotifier {
         //test symmetric encryption & decryption
 
         //final decrypted = encrypter.decrypt(encrypted, iv: AESVector);
-
-        // print(decrypted);
+        GotKeys = true;
+        print("get keys is done");
       } catch (e) {
         print(e);
       }
@@ -65,7 +74,8 @@ class ApiProvider with ChangeNotifier {
   }
 
   //create new user
-  Future<bool> StartGame(String userName) async {
+  Future<void> CreateUser(String userName) async {
+    print("creating user");
     var jsonbody = jsonEncode(<String, String>{'userName': userName});
 
     //encrypt data
@@ -74,7 +84,7 @@ class ApiProvider with ChangeNotifier {
 
     //send post request
     final response = await http.post(
-      Uri.parse('http://192.168.0.20:3000/api/CreateUser'),
+      Uri.parse('http://192.168.42.49:3000/api/CreateUser'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -82,11 +92,9 @@ class ApiProvider with ChangeNotifier {
         'data': encrypted.base64,
       }),
     );
-
     if (response.statusCode == 200) {
-      return true;
+      print("user created");
     }
-    return false;
   }
 
   //leave game
@@ -122,7 +130,8 @@ class ApiProvider with ChangeNotifier {
     final _encrypter = crypto.Encrypter(crypto.AES(AESKey, mode: AESMode.cbc));
     final EncryptedType = crypto.Encrypted.fromBase64(encryptedData);
     final decrypted = _encrypter.decrypt(EncryptedType, iv: AESVector);
-
+    // print(decrypted +
+    //     ".-----------------------------------------------------------------");
     final Map<String, dynamic> data = json.decode(decrypted);
     // print(data);
 
@@ -131,8 +140,8 @@ class ApiProvider with ChangeNotifier {
     var cardDeck = data['cardDeck'] as List;
 
     // print(data);
-    PokerTable table = PokerTable.ConvertFromJson(data);
-    print(table.collectiveCards[0]);
+     PokerTable table = PokerTable.ConvertFromJson(data);
+    // print(table.collectiveCards[0]);
     // List<User> users = [];
     // for (var i = 0; i < userList.length; i++) {
     //   var jsonCards = jsonDecode(userList[i]['pocketCards']);
@@ -142,9 +151,9 @@ class ApiProvider with ChangeNotifier {
     //   users.add(user);
     // }
     // print(table);
-    // print(userList);
-    // print(collectiveCards);
-    // print(cardDeck);
+    print(userList);
+    print(collectiveCards);
+    print(cardDeck);
 
     // List<User> userObjects =
     //     userList.map((user) => User.ConvertFromJson(user)).toList();

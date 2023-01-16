@@ -33,15 +33,14 @@ class MyApp extends StatelessWidget {
 class PokerApp extends StatelessWidget {
   const PokerApp({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Pink Ladies Poker Game')),
-      body: Builder(
-        builder: (context) {
-          return Login();
-        }
-      ),
+      body: Builder(builder: (context) {
+        return Login();
+      }),
     );
   }
 }

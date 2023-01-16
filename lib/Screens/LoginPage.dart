@@ -56,7 +56,7 @@ class _LoginState extends State<Login> {
             child: ElevatedButton(
               onPressed: () {
                 // provider.GetAES();
-                provider.StartGame(myTextController.text);
+                provider.CreateUser(myTextController.text);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const Lobby()));
               },

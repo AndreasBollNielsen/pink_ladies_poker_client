@@ -14,7 +14,7 @@ class Lobby extends StatefulWidget {
 
 class _LobbyState extends State<Lobby> {
   final _channel = WebSocketChannel.connect(
-    Uri.parse('ws://192.168.0.20:443'),
+    Uri.parse('ws://192.168.42.49:80'),
   );
 
   @override
@@ -32,12 +32,17 @@ class _LobbyState extends State<Lobby> {
                       fit: BoxFit.fill)),
               alignment: Alignment.center,
               child: StreamBuilder(
-                stream: _channel.stream,
-                builder: (context, snapshot) {
-                  provider.ConvertBytesToJson(snapshot.data);
-                  return Text(snapshot.hasData ? '${snapshot.data}' : '');
-                },
-              )),
+                  stream: _channel.stream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: const CircularProgressIndicator(),
+                      );
+                    } else {
+                      provider.ConvertBytesToJson(snapshot.data);
+                      return Text('has data');
+                    }
+                  })),
         )
         // child: ElevatedButton(
         //   child: Text('leave lobby'),
