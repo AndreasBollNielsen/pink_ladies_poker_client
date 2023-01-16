@@ -39,26 +39,27 @@ class _LoginState extends State<Login> {
                   hintText: 'Enter your desired user name'),
             ),
           ),
+          // Padding(
+          //   padding: const EdgeInsets.all(8.0),
+          //   child: ElevatedButton(
+          //     onPressed: () {
+          //       provider.PlayGame(myTextController.text);
+          //       //provider.GetAES();
+          //       //provider.StartGame(myTextController.text);
+          //       // Navigator.push(context,
+          //       //     MaterialPageRoute(builder: (context) => const Lobby()));
+          //     },
+          //     child: const Text('Get keys'),
+          //   ),
+          // ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () {
-                provider.GetAES();
-                //provider.StartGame(myTextController.text);
+              onPressed: () async {
+                // provider.GetAES();
+                await provider.PlayGame(myTextController.text);
                 // Navigator.push(context,
                 //     MaterialPageRoute(builder: (context) => const Lobby()));
-              },
-              child: const Text('Get keys'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // provider.GetAES();
-                provider.CreateUser(myTextController.text);
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => const Lobby()));
               },
               child: const Text('Start Game'),
             ),

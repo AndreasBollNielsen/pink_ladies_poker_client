@@ -2,7 +2,7 @@ import 'User.dart';
 
 class PokerTable {
   late List<User> users = [];
-  // final List<double> bets;
+  final List<double> bets;
   final List<String> collectiveCards;
   final List<String> cardDeck;
   final num dealer;
@@ -16,7 +16,7 @@ class PokerTable {
 
   PokerTable.ConvertFromJson(Map<String, dynamic> json)
       : //users = ConvertUsersToList(json),
-        // bets = json['bets'],
+        bets = List<double>.from(json['bets']),
         collectiveCards = List<String>.from(json['collectiveCards']),
         cardDeck = List<String>.from(json['cardDeck']),
         dealer = json['dealer'],
@@ -30,7 +30,7 @@ class PokerTable {
 
   Map<String, dynamic> ConvertToJson() => {
         'users': users,
-        // 'bets': bets,
+        'bets': bets,
         'collectiveCards': collectiveCards,
         'cardDeck': cardDeck,
         'dealer': dealer,

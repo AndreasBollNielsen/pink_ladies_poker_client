@@ -3,6 +3,7 @@ import 'package:encrypt/encrypt.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:pink_ladies_poker_client/Models/PokerTable.dart';
 import '../Helpers/EncryptionHelper.dart';
+import '../Helpers/Config.dart';
 import 'package:encrypt/encrypt.dart' as crypto;
 import 'package:http/http.dart' as http;
 
@@ -14,7 +15,7 @@ class ApiProvider with ChangeNotifier {
   late User MyUser;
   late bool GotKeys = false;
 
-  void PlayGame(String userName) async {
+  Future<void> PlayGame(String userName) async {
     if (!GotKeys) {
       await GetAES().whenComplete(() => CreateUser(userName));
     } else {
@@ -32,7 +33,7 @@ class ApiProvider with ChangeNotifier {
 
     //Send public key to Server & return encrypted AES keys
     final response = await http.post(
-      Uri.parse('http://192.168.42.49:3000/api/GetAES'),
+      Uri.parse('http://${Config.IP}:3000/api/GetAES'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -84,7 +85,7 @@ class ApiProvider with ChangeNotifier {
 
     //send post request
     final response = await http.post(
-      Uri.parse('http://192.168.42.49:3000/api/CreateUser'),
+      Uri.parse('http://${Config.IP}:3000/api/CreateUser'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -110,7 +111,7 @@ class ApiProvider with ChangeNotifier {
 
     //send post request
     final response = await http.post(
-      Uri.parse('http://192.168.0.20:3000/api/CreateUser'),
+      Uri.parse('http://${Config.IP}:3000/api/CreateUser'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -140,7 +141,7 @@ class ApiProvider with ChangeNotifier {
     var cardDeck = data['cardDeck'] as List;
 
     // print(data);
-     PokerTable table = PokerTable.ConvertFromJson(data);
+    PokerTable table = PokerTable.ConvertFromJson(data);
     // print(table.collectiveCards[0]);
     // List<User> users = [];
     // for (var i = 0; i < userList.length; i++) {
@@ -151,9 +152,9 @@ class ApiProvider with ChangeNotifier {
     //   users.add(user);
     // }
     // print(table);
-    print(userList);
-    print(collectiveCards);
-    print(cardDeck);
+    print(table.bets);
+    //print(collectiveCards);
+    //print(cardDeck);
 
     // List<User> userObjects =
     //     userList.map((user) => User.ConvertFromJson(user)).toList();
