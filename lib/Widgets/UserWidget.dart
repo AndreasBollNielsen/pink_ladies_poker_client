@@ -16,6 +16,13 @@ class UserWidget extends StatefulWidget {
 class _UserWidgetState extends State<UserWidget> {
   @override
   Widget build(BuildContext context) {
+    var card1 = 'back';
+    var card2 = 'back';
+    if (widget.user.PocketCards.length > 0) {
+      card1 = widget.user.PocketCards[0];
+      card2 = widget.user.PocketCards[1];
+    }
+
     return SizedBox(
       child: Container(
         width: 100,

@@ -37,8 +37,13 @@ class PokerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<ApiProvider>(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Pink Ladies Poker Game')),
+      appBar: provider.hideAppbar
+          ? null
+          : AppBar(
+              title: const Text('Pink Ladies Poker Game'),
+            ),
       body: Builder(builder: (context) {
         return Login();
       }),
