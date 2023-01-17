@@ -1,21 +1,23 @@
 class User {
-  int UserID;
-  int TableID;
-  String UserName;
-  double Saldo;
-  late List<String> PocketCards;
-  String State;
-  double Bet;
+  int UserID = 0;
+  int TableID = 0;
+  String UserName = "";
+  num Saldo = 0;
+  late List<String> PocketCards = [];
+  String State = "";
+  num Bet = 0;
 
-  // User(this.UserID, this.TableID, this.UserName, this.Saldo, this.PocketCards,this.State, this.Bet);
+  User(this.UserID, this.TableID, this.UserName, this.Saldo, this.State,
+      this.Bet);
 
   User.ConvertFromJson(Map<String, dynamic> json)
-      : UserID = json['userID'] as int,
-        TableID = json['tableID'] as int,
-        UserName = json['userName'] as String,
-        Saldo = json['saldo'] as double,
-        State = json['state'] as String,
-        Bet = json['bet'] as double;
+      : UserID = json['userID'],
+        TableID = json['tableID'],
+        UserName = json['userName'],
+        Saldo = json['saldo'],
+        State = json['state'],
+        PocketCards = List<String>.from(json['pocketCards']),
+        Bet = json['bet'];
 
   Map<String, dynamic> ConvertToJson() => {
         'userID': UserID,

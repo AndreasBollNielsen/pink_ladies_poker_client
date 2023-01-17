@@ -1,6 +1,5 @@
 class Config {
-
   //ip configuration for websocket and API calls
-  static String IP = '192.168.0.20';
-  static String Port = '443';
+  static String IP = '10.108.169.46';
+  static String Port = '80';
 }

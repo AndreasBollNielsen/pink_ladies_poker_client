@@ -6,19 +6,21 @@ import '../Helpers/EncryptionHelper.dart';
 import '../Helpers/Config.dart';
 import 'package:encrypt/encrypt.dart' as crypto;
 import 'package:http/http.dart' as http;
-
 import '../Models/User.dart';
 
 class ApiProvider with ChangeNotifier {
   late crypto.Key AESKey;
   late crypto.IV AESVector;
-  late User MyUser;
+  late User MyUser = User(0, 0, '', 0, '', 0);
+  late PokerTable pokerTable;
   late bool GotKeys = false;
 
   Future<void> PlayGame(String userName) async {
     if (!GotKeys) {
       await GetAES().whenComplete(() => CreateUser(userName));
     } else {
+      //MyUser = User(0, 0, 'userName', 0, '', 0);
+      print(MyUser.UserName);
       await CreateUser(userName);
     }
   }
@@ -137,11 +139,14 @@ class ApiProvider with ChangeNotifier {
     // print(data);
 
     var userList = data['users'] as List;
-    var collectiveCards = data['collectiveCards'] as List;
-    var cardDeck = data['cardDeck'] as List;
+    //var collectiveCards = data['collectiveCards'] as List;
+    //var cardDeck = data['cardDeck'] as List;
 
     // print(data);
+    MyUser = User.ConvertFromJson(userList[0]);
     PokerTable table = PokerTable.ConvertFromJson(data);
+    //table.users = userList;
+
     // print(table.collectiveCards[0]);
     // List<User> users = [];
     // for (var i = 0; i < userList.length; i++) {
@@ -152,7 +157,7 @@ class ApiProvider with ChangeNotifier {
     //   users.add(user);
     // }
     // print(table);
-    print(table.bets);
+    print(MyUser.UserName);
     //print(collectiveCards);
     //print(cardDeck);
 
