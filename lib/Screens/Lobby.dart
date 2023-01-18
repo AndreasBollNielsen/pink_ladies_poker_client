@@ -14,7 +14,7 @@ class Lobby extends StatefulWidget {
 
 class _LobbyState extends State<Lobby> {
   final _channel = WebSocketChannel.connect(
-    Uri.parse('ws://${Config.IP}:${Config.Port}'),
+    Uri.parse('ws://${Config.ws}:${Config.Port}'),
   );
 
   @override
@@ -75,10 +75,31 @@ class _LobbyState extends State<Lobby> {
                             width: 100,
                             height: 35,
                             // color: Colors.green,
-                            child: Text(' ${provider.MyUser.Bet}',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 14),
-                                textAlign: TextAlign.center),
+                            child: DefaultTextStyle(
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
+                              textAlign: TextAlign.center,
+                              child: Text(
+                                ' ${provider.MyUser.Bet}',
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          left: 350,
+                          bottom: 260,
+                          child: Container(
+                            width: 100,
+                            height: 35,
+                            // color: Colors.green,
+                            child: DefaultTextStyle(
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
+                              textAlign: TextAlign.center,
+                              child: Text(
+                                ' Pot ${provider.pokerTable!.totalPot}',
+                              ),
+                            ),
                           ),
                         ),
                         Center(

@@ -30,6 +30,7 @@ class ApiProvider with ChangeNotifier {
 
   Future<void> PlayGame(String userName) async {
     if (!GotKeys) {
+      // await GetAES();
       await GetAES().whenComplete(() => CreateUser(userName));
       MyUser.UserName = userName;
       MyUser.UserID = 1;
@@ -49,7 +50,7 @@ class ApiProvider with ChangeNotifier {
 
     //Send public key to Server & return encrypted AES keys
     final response = await http.post(
-      Uri.parse('http://${Config.IP}:3000/api/GetAES'),
+      Uri.parse('${Config.IP}/GetAES'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -101,7 +102,7 @@ class ApiProvider with ChangeNotifier {
 
     //send post request
     final response = await http.post(
-      Uri.parse('http://${Config.IP}:3000/api/CreateUser'),
+      Uri.parse('${Config.IP}/CreateUser'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -111,6 +112,8 @@ class ApiProvider with ChangeNotifier {
     );
     if (response.statusCode == 200) {
       print("user created");
+    } else {
+      print(response.statusCode);
     }
   }
 
@@ -129,7 +132,7 @@ class ApiProvider with ChangeNotifier {
 
     //send post request
     final response = await http.post(
-      Uri.parse('http://${Config.IP}:3000/api/LeaveTable'),
+      Uri.parse('${Config.IP}/LeaveTable'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -217,7 +220,7 @@ class ApiProvider with ChangeNotifier {
 
     //send post request
     final response = await http.post(
-      Uri.parse('http://${Config.IP}:3000/api/Useraction'),
+      Uri.parse('${Config.IP}/Useraction'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

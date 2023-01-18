@@ -120,10 +120,12 @@ class _UserWidgetState extends State<UserWidget> {
                     Container(
                       width: 90,
                       color: Colors.black,
-                      child: Text(
-                        widget.user.State,
+                      child: DefaultTextStyle(
                         style: TextStyle(color: Colors.white, fontSize: 10),
                         textAlign: TextAlign.center,
+                        child: Text(
+                          "${widget.user.State} ${widget.user.Bet}",
+                        ),
                       ),
                     ),
                   ],
