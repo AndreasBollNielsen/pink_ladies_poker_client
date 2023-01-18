@@ -35,24 +35,8 @@ class _LobbyState extends State<Lobby> {
               stream: _channel.stream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  //  var users = provider.ConvertJsonToModel(snapshot.data);
-                  // var positions = provider.GetPositions();
-                  // var users = provider.GetFakeUsers();
                   return Stack(
-                    children: [
-                      // Positioned(
-                      //   bottom: 25,
-                      //   left: 325,
-                      //   child: UserWidget(user: provider.MyUser),
-                      // ),
-                      // for (int i = 0; i < users.length; i++)
-                      //   Positioned(
-                      //     left: positions[i].left,
-                      //     bottom: positions[i].bottom,
-                      //     child: UserWidget(user: users[i]),
-                      //   ),
-                      const CircularProgressIndicator()
-                    ],
+                    children: [const CircularProgressIndicator()],
                   );
                 } else if (snapshot.connectionState == ConnectionState.active) {
                   if (snapshot.hasData) {
@@ -133,14 +117,21 @@ class _LobbyState extends State<Lobby> {
                           left: 300,
                           top: 25,
                           child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.pink,
+                                border: Border.all(color: Colors.white),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5))),
                             width: 200,
-                            height: 50,
-                            color: Colors.blue,
-                            child: Text(
-                              provider.userInfo,
+                            height: 25,
+                            // color: Colors.pink,
+                            child: DefaultTextStyle(
                               style:
-                                  TextStyle(color: Colors.white, fontSize: 14),
-                              textAlign: TextAlign.center,
+                                  TextStyle(color: Colors.white, fontSize: 15),
+                              child: Text(
+                                provider.userInfo,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         ),
