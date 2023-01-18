@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import '../Providers/ApiProvider.dart';
 import 'package:provider/provider.dart';
 import '../Helpers/Config.dart';
@@ -22,7 +20,9 @@ class _LobbyState extends State<Lobby> {
   @override
   Widget build(BuildContext context) {
     var provider = Provider.of<ApiProvider>(context);
-    var myTextController = TextEditingController();
+    // var myTextController = TextEditingController();
+    var userInfo = "your";
+    double _currentSliderValue = 0;
     return Container(
       child: Center(
         child: Stack(
@@ -54,85 +54,49 @@ class _LobbyState extends State<Lobby> {
                       const CircularProgressIndicator()
                     ],
                   );
-
-                  // return Center(
-                  //   child: Container(
-                  //     // color: Colors.blue,
-                  //     width: 650,
-                  //     height: 300,
-                  //     child: Stack(
-                  //       fit: StackFit.loose,
-                  //       children: [
-                  //         Positioned(
-                  //             bottom: 0,
-                  //             left: 275,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 0,
-                  //             left: 125,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 0,
-                  //             left: 420,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 75,
-                  //             left: 50,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 200,
-                  //             left: 50,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 230,
-                  //             left: 200,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 230,
-                  //             left: 375,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 200,
-                  //             left: 525,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //             bottom: 100,
-                  //             left: 525,
-                  //             child: UserWidget(user: provider.MyUser)),
-                  //         Positioned(
-                  //           left: 300,
-                  //           top: 125,
-                  //           child: SizedBox(
-                  //             height: 50,
-                  //             width: 50,
-                  //             child: const CircularProgressIndicator(),
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // );
                 } else if (snapshot.connectionState == ConnectionState.active) {
                   if (snapshot.hasData) {
                     print('got data');
                     var users = provider.ConvertJsonToModel(snapshot.data);
                     var positions = provider.GetPositions();
-
+                    userInfo = provider.userInfo;
+                    print("------pokertable: ${provider.pokerTable}");
                     return Stack(
                       children: [
                         Positioned(
-                          bottom: 25,
+                          bottom: 50,
                           left: 325,
                           child: UserWidget(user: provider.MyUser),
                         ),
+                        Positioned(
+                          left: 475,
+                          bottom: 3,
+                          child: Container(
+                            width: 100,
+                            height: 35,
+                            // color: Colors.green,
+                            child: Text(' ${provider.MyUser.Bet}',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 14),
+                                textAlign: TextAlign.center),
+                          ),
+                        ),
                         Center(
                           child: Container(
-                            width: 60,
+                            width: 350,
                             height: 90,
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              textDirection: TextDirection.ltr,
                               children: [
-                                // for (int i = 0;i < provider.pokerTable.collectiveCards.length; i++)
-                                // Image.asset("${provider.pokerTable.collectiveCards[i]}.jpg"),
+                                if (provider.pokerTable != null)
+                                  for (int i = 0;
+                                      i <
+                                          provider.pokerTable!.collectiveCards
+                                              .length;
+                                      i++)
+                                    Image.asset(
+                                        "graphics/${provider.pokerTable!.collectiveCards[i]}.jpg"),
                               ],
                             ),
                           ),
@@ -144,6 +108,21 @@ class _LobbyState extends State<Lobby> {
                             bottom: positions[i].bottom,
                             child: UserWidget(user: users[i]),
                           ),
+                        Positioned(
+                          left: 300,
+                          top: 25,
+                          child: Container(
+                            width: 200,
+                            height: 50,
+                            color: Colors.blue,
+                            child: Text(
+                              provider.userInfo,
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 14),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                       ],
                     );
                   } else {
@@ -157,16 +136,12 @@ class _LobbyState extends State<Lobby> {
                   //   ],
 
                 } else {
-                  return Text('State: ${snapshot.connectionState}');
+                  return Text('no connection...');
                 }
               },
             ),
             Stack(
               children: [
-                // Positioned(
-                //     bottom: 45,
-                //     left: 350,
-                //     child: UserWidget(user: provider.MyUser)),
                 Positioned(
                   left: 0,
                   top: 25,
@@ -179,7 +154,17 @@ class _LobbyState extends State<Lobby> {
                   ),
                 ),
                 Positioned(
-                  bottom: 20,
+                  left: 0,
+                  top: 325,
+                  child: ElevatedButton(
+                    onPressed: () => {
+                      Navigator.pop(context),
+                    },
+                    child: Text('return'),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
                   left: 200,
                   child: Center(
                     child: Row(
@@ -190,7 +175,10 @@ class _LobbyState extends State<Lobby> {
                           child: ElevatedButton(
                             onPressed: () => {
                               //call api
-                              Navigator.pop(context),
+                              provider.MyUser.State = 'bet',
+                              provider.MyUser.Bet = 25,
+                              provider.UserInteraction(provider.MyUser),
+                              // Navigator.pop(context),
                             },
                             child: Text('Call'),
                           ),
@@ -200,6 +188,9 @@ class _LobbyState extends State<Lobby> {
                           child: ElevatedButton(
                             onPressed: () => {
                               //call api
+                              provider.MyUser.State = 'fold',
+                              provider.MyUser.Bet = 0,
+                              provider.UserInteraction(provider.MyUser),
                             },
                             child: Text('Fold'),
                           ),
@@ -207,6 +198,9 @@ class _LobbyState extends State<Lobby> {
                         ElevatedButton(
                           onPressed: () => {
                             //call api
+                            provider.MyUser.State = 'check',
+                            provider.MyUser.Bet = 0,
+                            provider.UserInteraction(provider.MyUser),
                           },
                           child: Text('Check'),
                         ),
@@ -217,27 +211,34 @@ class _LobbyState extends State<Lobby> {
                             onPressed: () => {
                               //call api
                               provider.MyUser.State = 'bet',
+                              provider.MyUser.Bet = 25,
                               provider.UserInteraction(provider.MyUser),
                             },
                             child: Text('Bet'),
                           ),
                         ),
-                        Material(
-                          child: Container(
-                            width: 100,
-                            height: 35,
-                            color: Colors.green,
-                            child: TextField(
-                              keyboardType: TextInputType.number,
-                              controller: myTextController,
-                              decoration: InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  hintText: 'Enter bet'),
-                              textAlign: TextAlign.center,
-                              textAlignVertical: TextAlignVertical.bottom,
-                            ),
-                          ),
-                        ),
+                        // Material(
+                        //   child: Container(
+                        //     width: 100,
+                        //     height: 35,
+                        //     color: Colors.green,
+                        //     child: Slider(
+                        //       value: _currentSliderValue,
+                        //       min: 0,
+                        //       // max: provider.MyUser != null
+                        //       //     ? provider.MyUser.Saldo.toDouble()
+                        //       //     : 10000.0,
+                        //       max: 1000,
+                        //       divisions: 100,
+                        //       label: _currentSliderValue.round().toString(),
+                        //       onChanged: (value) => {
+                        //         setState(
+                        //           () => {_currentSliderValue = value},
+                        //         ),
+                        //       },
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),

@@ -13,9 +13,10 @@ class ApiProvider with ChangeNotifier {
   late crypto.Key AESKey;
   late crypto.IV AESVector;
   late User MyUser = User(0, 0, '', 0, '', 0);
-  late PokerTable pokerTable;
+  PokerTable? pokerTable;
   late bool GotKeys = false;
   bool hideAppbar = true;
+  String userInfo = "";
   late List<Position> positions = [
     Position(50, 175),
     Position(50, 475),
@@ -159,7 +160,7 @@ class ApiProvider with ChangeNotifier {
         (data['users'] as List).map((i) => new User.ConvertFromJson(i));
 
     //set app user when starting new game
-    if (MyUser.UserID == 0) {
+    if (MyUser.UserID == 0 || MyUser.UserName != '') {
       for (final user in userList) {
         if (user.UserName == MyUser.UserName) {
           MyUser = user;
@@ -176,10 +177,28 @@ class ApiProvider with ChangeNotifier {
     PokerTable table = PokerTable.ConvertFromJson(data);
     table.users = userList.toList();
 
+    for (var i = 0; i < table.users.length; i++) {
+      if (MyUser.UserName == table.users[i].UserName) {
+        //check if current round is same as current user
+        if (table.currentUser == i) {
+          userInfo = "your turn";
+          break;
+        } else {
+          userInfo = "";
+        }
+      }
+    }
+
+    print("current user:  ${userInfo}");
+    print("current round:  ${table.currentUser}");
     //remove duplicate of app user
     table.users.removeWhere((user) => user.UserID == MyUser.UserID);
-    print("current user:  ${table.currentUser}");
-    //print(table.users);
+
+    //remove pocket cards from users
+    for (var i = 0; i < table.users.length; i++) {
+      table.users[i].PocketCards = [];
+    }
+    pokerTable = table;
 
     return table.users;
   }

@@ -18,6 +18,8 @@ class _UserWidgetState extends State<UserWidget> {
   Widget build(BuildContext context) {
     var card1 = 'back';
     var card2 = 'back';
+    print(widget.user.PocketCards.length);
+    print(widget.user.UserName);
     if (widget.user.PocketCards.length > 0) {
       card1 = widget.user.PocketCards[0];
       card2 = widget.user.PocketCards[1];
@@ -50,7 +52,7 @@ class _UserWidgetState extends State<UserWidget> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(5),
                       child: Image.asset(
-                        'graphics/qS.jpg',
+                        'graphics/${card1}.jpg',
                         width: 60,
                         height: 90,
                       ),
@@ -75,7 +77,7 @@ class _UserWidgetState extends State<UserWidget> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(5),
                       child: Image.asset(
-                        'graphics/qS.jpg',
+                        'graphics/${card2}.jpg',
                         width: 60,
                         height: 90,
                       ),

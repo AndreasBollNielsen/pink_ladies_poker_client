@@ -5,7 +5,7 @@ class User {
   num Saldo = 0;
   late List<String> PocketCards = [];
   String State = "";
-  num Bet = 0;
+  dynamic Bet = 0;
 
   User(this.UserID, this.TableID, this.UserName, this.Saldo, this.State,
       this.Bet);
